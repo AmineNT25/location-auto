@@ -1,0 +1,22 @@
+# FastAPI only. PostgreSQL is hosted on Neon; do not provision a Render database.
+services:
+  - type: web
+    name: drivego-api
+    runtime: python
+    repo: https://github.com/AmineNT25/location-auto
+    branch: main
+    rootDir: backend
+    region: frankfurt
+    plan: free
+    buildCommand: python -m pip install .
+    # A dedicated preDeployCommand requires a paid Render web service.
+    startCommand: python -m alembic upgrade head && exec python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/v1/health/ready
+    autoDeployTrigger: commit
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: CORS_ORIGINS
+        value: '[]'
+      - key: DATABASE_URL
+        sync: false
